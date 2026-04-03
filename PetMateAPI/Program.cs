@@ -7,13 +7,26 @@ using PetMateAPI.Models;
 using PetMateAPI.Services;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 // Database
-builder.Services.AddDbContext<AppDbContext>(options =>
+var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(dbUrl))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(dbUrl)
+    );
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration
         .GetConnectionString("DefaultConnection")));
-
+}
 // Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {

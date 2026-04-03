@@ -1,20 +1,35 @@
-# Use .NET 8 SDK
+# -----------------------
+# 1. Build stage
+# -----------------------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-WORKDIR /app
-
+# Copy solution and project files
 COPY *.sln ./
 COPY PetMateAPI/*.csproj ./PetMateAPI/
 
+# Restore dependencies
 RUN dotnet restore
 
+# Copy all source code
 COPY . ./
-RUN dotnet build -c Release -o out
 
-# Use .NET 8 runtime
+# Build and publish
+WORKDIR /src/PetMateAPI
+RUN dotnet publish -c Release -o /app/out
+
+# -----------------------
+# 2. Runtime stage
+# -----------------------
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
+
+# Copy published files from build stage
 COPY --from=build /app/out ./
-EXPOSE 5000
-EXPOSE 5001
+
+# Set Railway port
+ENV ASPNETCORE_URLS=http://+:$PORT
+EXPOSE $PORT
+
+# Start the app
 ENTRYPOINT ["dotnet", "PetMateAPI.dll"]
