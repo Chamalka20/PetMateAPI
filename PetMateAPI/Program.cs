@@ -10,16 +10,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Railway port
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
 
+// --------------------
 // Database
+// --------------------
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(dbUrl))
-
-if (!string.IsNullOrEmpty(dbUrl))
 {
-    // Parse the Railway DATABASE_URL
     var databaseUri = new Uri(dbUrl);
     var userInfo = databaseUri.UserInfo.Split(':');
 
@@ -39,12 +39,13 @@ if (!string.IsNullOrEmpty(dbUrl))
 }
 else
 {
-    // Use local connection string if DATABASE_URL not set
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
+// --------------------
 // Identity
+// --------------------
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     options.Password.RequiredLength = 8;
@@ -56,7 +57,9 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// JWT
+// --------------------
+// JWT Authentication
+// --------------------
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -77,6 +80,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// --------------------
+// Swagger
+// --------------------
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -100,42 +107,46 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
-// Services
+// --------------------
+// App services & controllers
+// --------------------
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
 // --------------------
-// 2. Apply migrations automatically
+// Build app
+// --------------------
+var app = builder.Build();
+
+// --------------------
+// Apply migrations
 // --------------------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); 
+    db.Database.Migrate();
 }
 
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// --------------------
+// HTTP pipeline
+// --------------------
+if (app.Environment.IsDevelopment() || true) // Show Swagger even in production for Railway testing
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Skip HTTPS redirection on Railway to avoid warnings
+// app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();
