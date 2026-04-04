@@ -16,17 +16,34 @@ builder.WebHost.UseUrls($"http://*:{port}");
 // Database
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(dbUrl))
+
+if (!string.IsNullOrEmpty(dbUrl))
 {
+    // Parse the Railway DATABASE_URL
+    var databaseUri = new Uri(dbUrl);
+    var userInfo = databaseUri.UserInfo.Split(':');
+
+    var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = databaseUri.Host,
+        Port = databaseUri.Port,
+        Username = userInfo[0],
+        Password = userInfo[1],
+        Database = databaseUri.AbsolutePath.TrimStart('/'),
+        SslMode = Npgsql.SslMode.Require,
+        TrustServerCertificate = true
+    };
+
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(dbUrl)
-    );
+        options.UseNpgsql(npgsqlBuilder.ToString()));
 }
 else
 {
+    // Use local connection string if DATABASE_URL not set
     builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration
-        .GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
+
 // Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
