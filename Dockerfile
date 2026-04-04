@@ -28,8 +28,8 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 # Set Railway port
-ENV ASPNETCORE_URLS=http://+:$PORT
-EXPOSE $PORT
+ENV PORT=8080
+ENV ASPNETCORE_URLS=http://+:${PORT}
 
 # Start the app
 ENTRYPOINT ["dotnet", "PetMateAPI.dll"]
