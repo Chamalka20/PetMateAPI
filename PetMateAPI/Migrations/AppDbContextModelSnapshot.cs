@@ -292,27 +292,66 @@ namespace PetMateAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<List<string>>("AvailableDays")
-                        .HasColumnType("text[]");
-
                     b.Property<string>("ClinicName")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ExperienceYears")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstNameLower")
                         .HasColumnType("text");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
 
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastNameLower")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Location")
                         .HasColumnType("text");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("NameLower")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
+
                     b.Property<double>("Rating")
                         .HasColumnType("double precision");
 
+                    b.Property<int?>("RewardPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("Services")
+                        .HasColumnType("text[]");
+
                     b.Property<List<string>>("Specializations")
                         .HasColumnType("text[]");
+
+                    b.Property<int?>("WaitingTimeMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("WorkingDays")
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkingTime")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
