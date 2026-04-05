@@ -10,4 +10,6 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
     public DbSet<Pet> Pets { get; set; }
 
+    public DbSet<Vet> Vets { get; set; }
+
 }
