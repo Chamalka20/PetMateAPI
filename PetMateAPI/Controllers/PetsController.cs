@@ -17,15 +17,30 @@ public class PetsController : ControllerBase
         _petService = petService;
     }
 
+    private string GetUserId() =>
+       User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
     [Authorize]
     [HttpPost("create")]
-    public async Task<IActionResult> CreatePet(CreatePetDto dto)
+    public async Task<IActionResult> CreatePet(PetDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var pet = await _petService.CreatePetAsync(dto, userId);
 
         return Ok(pet);
+    }
+
+    [Authorize]
+    [HttpGet("list")]
+    public async Task<IActionResult> GetPetList()
+    {
+        var pets = await _petService.GetPetListAsync(GetUserId());
+        return Ok(new
+        {
+            count = pets.Count,
+            pets = pets
+        });
     }
 }
 

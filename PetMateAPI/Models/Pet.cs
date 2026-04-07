@@ -17,5 +17,6 @@
         // optional: link to user
         public string UserId { get; set; }
         public AppUser User { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
