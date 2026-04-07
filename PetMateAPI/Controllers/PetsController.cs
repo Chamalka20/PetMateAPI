@@ -18,7 +18,7 @@ public class PetsController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> CreatePet(CreatePetDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
