@@ -18,15 +18,31 @@
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
+        public string? Type { get; set; }
         public string Breed { get; set; } = string.Empty;
         public int Age { get; set; }
-        public string Gender { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string? PhotoUrl { get; set; }
-        public bool IsAvailable { get; set; }
+        public double Weight { get; set; }
+        public string Gender { get; set; } = "Male";
+        public bool IsSpayedNeutered { get; set; }
+        public string MedicalConditions { get; set; } = "";
+        public string Allergies { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
+
         public string UserId { get; set; } = string.Empty;
-        public string OwnerName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class UpdatePetDto
+    {
+        public string? Name { get; set; }
+        public string? Type { get; set; }
+        public string? Breed { get; set; }
+        public int? Age { get; set; }
+        public double? Weight { get; set; }
+        public string? Gender { get; set; }
+        public bool? IsSpayedNeutered { get; set; }
+        public string? MedicalConditions { get; set; }
+        public string? Allergies { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

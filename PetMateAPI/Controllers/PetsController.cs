@@ -38,9 +38,49 @@ public class PetsController : ControllerBase
         var pets = await _petService.GetPetListAsync(GetUserId());
         return Ok(new
         {
-            count = pets.Count,
+         
             pets = pets
         });
+    }
+
+    [HttpGet("{petId}")]
+    public async Task<IActionResult> GetPet(int petId)
+    {
+        var pet = await _petService.GetPetAsync(GetUserId(), petId);
+        if (pet == null)
+            return NotFound(new { message = "Pet not found." });
+
+        return Ok(pet);
+    }
+
+    // PUT /api/pets/5
+    [HttpPut("{petId}")]
+    public async Task<IActionResult> UpdatePet(
+        int petId, [FromBody] UpdatePetDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var pet = await _petService.UpdatePetAsync(GetUserId(), petId, dto);
+        if (pet == null)
+            return NotFound(new { message = "Pet not found." });
+
+        return Ok(new
+        {
+            message = "Pet updated successfully!",
+            pet = pet
+        });
+    }
+
+    // DELETE /api/pets/5
+    [HttpDelete("{petId}")]
+    public async Task<IActionResult> DeletePet(int petId)
+    {
+        var success = await _petService.DeletePetAsync(GetUserId(), petId);
+        if (!success)
+            return NotFound(new { message = "Pet not found." });
+
+        return Ok(new { message = "Pet deleted successfully." });
     }
 }
 
