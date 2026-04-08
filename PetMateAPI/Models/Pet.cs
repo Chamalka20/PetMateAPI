@@ -10,8 +10,8 @@
         public double Weight { get; set; }
         public string Gender { get; set; } = "Male";
         public bool IsSpayedNeutered { get; set; }
-        public string MedicalConditions { get; set; } = "";
-        public string Allergies { get; set; } = "";
+        public List<string> MedicalConditions { get; set; } = new();
+        public List<string> Allergies { get; set; } = new();
         public string ImageUrl { get; set; } = "";
 
         // optional: link to user

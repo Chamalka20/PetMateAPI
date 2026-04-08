@@ -27,16 +27,16 @@ public class PetService : IPetService
     {
         var pet = new Pet
         {
-            Name = dto.Name,
+            Name = dto.Name ?? string.Empty,
             Type = dto.Type,
-            Breed = dto.Breed,
+            Breed = dto.Breed ?? string.Empty,
             Age = dto.Age,
             Weight = dto.Weight,
-            Gender = dto.Gender,
+            Gender = dto.Gender ?? "Male",
             IsSpayedNeutered = dto.IsSpayedNeutered,
-            MedicalConditions = string.Join(",", dto.MedicalConditions),
-            Allergies = string.Join(",", dto.Allergies),
-            ImageUrl = dto.ImageUrl,
+            MedicalConditions = dto.MedicalConditions?.Where(x => x != null).Select(x => x!).ToList() ?? new List<string>(),
+            Allergies = dto.Allergies?.Where(x => x != null).Select(x => x!).ToList() ?? new List<string>(),
+            ImageUrl = dto.ImageUrl ?? string.Empty,
             UserId = userId
         };
 
@@ -68,14 +68,15 @@ public class PetService : IPetService
     }
 
     // ── Update ────────────────────────────────────
-    public async Task<PetResponseDto?> UpdatePetAsync(
-      string userId, int petId, UpdatePetDto dto)
+    public async Task<PetResponseDto?> UpdatePetAsync(string userId, int petId, UpdatePetDto dto)
     {
+        // Find the pet for this user
         var pet = await _context.Pets
             .FirstOrDefaultAsync(p => p.Id == petId && p.UserId == userId);
 
         if (pet == null) return null;
 
+        // Update simple properties
         if (dto.Name != null) pet.Name = dto.Name;
         if (dto.Type != null) pet.Type = dto.Type;
         if (dto.Breed != null) pet.Breed = dto.Breed;
@@ -83,8 +84,14 @@ public class PetService : IPetService
         if (dto.Weight.HasValue) pet.Weight = dto.Weight.Value;
         if (dto.Gender != null) pet.Gender = dto.Gender;
         if (dto.IsSpayedNeutered.HasValue) pet.IsSpayedNeutered = dto.IsSpayedNeutered.Value;
-        if (dto.MedicalConditions != null) pet.MedicalConditions = dto.MedicalConditions;
-        if (dto.Allergies != null) pet.Allergies = dto.Allergies;
+
+        // Convert lists to comma-separated strings for DB
+        if (dto.MedicalConditions != null)
+            pet.MedicalConditions = dto.MedicalConditions.Where(x => x != null).Select(x => x!).ToList();
+
+        if (dto.Allergies != null)
+            pet.Allergies = dto.Allergies.Where(x => x != null).Select(x => x!).ToList();
+
         if (dto.ImageUrl != null) pet.ImageUrl = dto.ImageUrl;
 
         await _context.SaveChangesAsync();
