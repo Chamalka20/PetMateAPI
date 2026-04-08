@@ -41,8 +41,8 @@
         public double? Weight { get; set; }
         public string? Gender { get; set; }
         public bool? IsSpayedNeutered { get; set; }
-        public string? MedicalConditions { get; set; }
-        public string? Allergies { get; set; }
+        public List<string?>? MedicalConditions { get; set; }
+        public List<string?>? Allergies { get; set; }
         public string? ImageUrl { get; set; }
     }
 }
