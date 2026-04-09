@@ -9,32 +9,48 @@ namespace PetMateAPI.Controllers
     [Route("api/[controller]")]
     public class VetsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IVetService _vetService;
 
-        public VetsController(AppDbContext context)
+        public VetsController(IVetService vetService)
         {
-            _context = context;
+            _vetService = vetService;
         }
 
-        //  BULK INSERT
+        [HttpGet]
+        public async Task<IActionResult> GetVets(int page = 1, int pageSize = 10)
+        {
+            var vets = await _vetService.GetVets(page, pageSize);
+            var total = await _vetService.GetTotalCount();
+
+            return Ok(new
+            {
+                total,
+                page,
+                pageSize,
+                data = vets
+            });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetVet(int id)
+        {
+            var vet = await _vetService.GetVetById(id);
+
+            if (vet == null)
+                return NotFound();
+
+            return Ok(vet);
+        }
+
         [HttpPost("bulk")]
         public async Task<IActionResult> BulkInsert(List<Vet> vets)
         {
             if (vets == null || !vets.Any())
                 return BadRequest("No data provided");
 
-            await _context.Vets.AddRangeAsync(vets);
-            await _context.SaveChangesAsync();
+            var count = await _vetService.BulkInsert(vets);
 
-            return Ok($"{vets.Count} vets inserted");
-        }
-
-        //  GET ALL VETS 
-        [HttpGet]
-        public async Task<IActionResult> GetVets()
-        {
-            var vets = await _context.Vets.ToListAsync();
-            return Ok(vets);
+            return Ok($"{count} vets inserted");
         }
     }
 }
