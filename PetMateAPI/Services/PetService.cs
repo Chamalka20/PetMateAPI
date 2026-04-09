@@ -112,18 +112,25 @@ public class PetService : IPetService
         return true;
     }
 
-    private PetResponseDto MapToDto(Pet pet) => new()
+    private PetResponseDto MapToDto(Pet pet)
     {
-        Id = pet.Id,
-        Name = pet.Name,
-        Type = pet.Type,
-        Breed = pet.Breed,
-        Age = pet.Age,
-        Gender = pet.Gender,
-        ImageUrl = pet.ImageUrl,
-        UserId = pet.UserId,
-        CreatedAt = pet.CreatedAt
-    };
+        return new PetResponseDto
+        {
+            Id = pet.Id,
+            Name = pet.Name,
+            Type = pet.Type,
+            Breed = pet.Breed,
+            Age = pet.Age,
+            Weight = pet.Weight,
+            Gender = pet.Gender,
+            IsSpayedNeutered = pet.IsSpayedNeutered,
+            MedicalConditions = pet.MedicalConditions ?? new List<string>(),
+            Allergies = pet.Allergies ?? new List<string>(),
+            ImageUrl = pet.ImageUrl,
+            UserId = pet.UserId,
+            CreatedAt = pet.CreatedAt
+        };
+    }
 
     private async Task<PetResponseDto> ToDto(Pet pet)
     {
