@@ -16,7 +16,7 @@ namespace PetMateAPI.Controllers
             _vetService = vetService;
         }
 
-        [HttpGet("vets")]
+        [HttpGet("list")]
         public async Task<IActionResult> GetVets(int page = 1, int pageSize = 10)
         {
             var vets = await _vetService.GetVets(page, pageSize);
