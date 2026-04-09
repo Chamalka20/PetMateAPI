@@ -22,7 +22,7 @@ public class PetsController : ControllerBase
 
     [Authorize]
     [HttpPost("create")]
-    public async Task<IActionResult> CreatePet(PetDto dto)
+    public async Task<IActionResult> CreatePet([FromBody] PetDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
