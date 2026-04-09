@@ -24,11 +24,7 @@ public class PetsController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreatePet([FromBody] PetDto dto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var pet = await _petService.CreatePetAsync(dto, userId);
-
-        return Ok(pet);
+        return Ok(new { message = "NEW API WORKING ✅" });
     }
 
     [Authorize]
