@@ -15,18 +15,15 @@ namespace PetMateAPI.Controllers
         {
             _vetService = vetService;
         }
-
         [HttpGet("list")]
-        public async Task<IActionResult> GetVets(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetVets([FromQuery] VetFilterRequest filter)
         {
-            var vets = await _vetService.GetVets(page, pageSize);
-            var total = await _vetService.GetTotalCount();
-
+            var (vets, total) = await _vetService.GetFilteredVets(filter);
             return Ok(new
             {
                 total,
-                page,
-                pageSize,
+                page = filter.Page,
+                pageSize = filter.PageSize,
                 data = vets
             });
         }
