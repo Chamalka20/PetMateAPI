@@ -1,4 +1,4 @@
-﻿using FirebaseAdmin.Auth;
+﻿using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using PetMateAPI.DTOs;
@@ -97,29 +97,28 @@ public class AuthService : IAuthService
 
     // ── Google Sign-In ────────────────────────────
     public async Task<(bool Success, string? Error, AuthResponseDto? Data)>
-        GoogleSignInAsync(GoogleSignInDto dto)
+     GoogleSignInAsync(GoogleSignInDto dto)
     {
         try
         {
-            // 1. Verify Firebase token
-            var decodedToken = await FirebaseAuth.DefaultInstance
-                .VerifyIdTokenAsync(dto.FirebaseToken);
+            // 1. Verify Google ID token
+            var payload = await GoogleJsonWebSignature.ValidateAsync(
+                dto.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { "YOUR_GOOGLE_CLIENT_ID" } 
+                });
 
-            // 2. Extract user info from token
-            var email = decodedToken.Claims["email"].ToString()!;
-            var name = decodedToken.Claims.ContainsKey("name")
-                        ? decodedToken.Claims["name"].ToString()!
-                        : email;
-            var photo = decodedToken.Claims.ContainsKey("picture")
-                        ? decodedToken.Claims["picture"].ToString()
-                        : null;
+            // 2. Extract user info
+            var email = payload.Email;
+            var name = payload.Name ?? email;
+            var photo = payload.Picture;
 
             // 3. Find or create user
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
-                // First time Google sign-in → create account
                 user = new AppUser
                 {
                     FullName = name,
@@ -132,6 +131,7 @@ public class AuthService : IAuthService
                 };
 
                 var result = await _userManager.CreateAsync(user);
+
                 if (!result.Succeeded)
                 {
                     var error = result.Errors.FirstOrDefault()?.Description;
@@ -142,16 +142,17 @@ public class AuthService : IAuthService
             }
             else
             {
-                // Returning Google user → update photo in case it changed
+                // Update profile photo if changed
                 user.ProfilePhotoUrl = photo;
                 await _userManager.UpdateAsync(user);
             }
 
+            // 4. Return your JWT response
             return (true, null, BuildResponse(user));
         }
-        catch (FirebaseAuthException ex)
+        catch (InvalidJwtException ex)
         {
-            _logger.LogWarning("Invalid Firebase token: {Message}", ex.Message);
+            _logger.LogWarning("Invalid Google token: {Message}", ex.Message);
             return (false, "Invalid or expired Google token. Please sign in again.", null);
         }
         catch (Exception ex)

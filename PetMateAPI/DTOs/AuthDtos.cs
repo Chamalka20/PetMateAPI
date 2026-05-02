@@ -31,7 +31,7 @@ public class LoginDto
 public class GoogleSignInDto
 {
     [Required]
-    public string FirebaseToken { get; set; } = string.Empty;
+    public string IdToken { get; set; } = string.Empty;
 }
 public class AuthResponseDto
 {
