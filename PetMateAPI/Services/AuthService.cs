@@ -28,6 +28,9 @@ public class AuthService : IAuthService
     private readonly IConfiguration _config;
     private readonly ILogger<AuthService> _logger;
 
+
+
+
     public AuthService(
         UserManager<AppUser> userManager,
         IConfiguration config,
@@ -101,6 +104,7 @@ public class AuthService : IAuthService
     {
         try
         {
+            var clientId = _config["Google:ClientId"];
             // 1. Verify Google ID token
             var payload = await GoogleJsonWebSignature.ValidateAsync(
                 dto.IdToken,
