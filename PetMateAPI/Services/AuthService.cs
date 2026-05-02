@@ -110,7 +110,7 @@ public class AuthService : IAuthService
                 dto.IdToken,
                 new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = new[] { "YOUR_GOOGLE_CLIENT_ID" } 
+                    Audience = new[] { clientId } 
                 });
 
             // 2. Extract user info
