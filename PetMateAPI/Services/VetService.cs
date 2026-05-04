@@ -28,8 +28,9 @@ public class VetService : IVetService
         if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
         {
             var q = filter.SearchQuery.ToLower().Trim();
+
             query = query.Where(v =>
-                (v.NameLower != null && v.NameLower.Contains(q)) ||
+                (v.Name != null && v.Name.ToLower().Contains(q)) ||
                 (v.Services != null && v.Services.Any(s => s.ToLower().Contains(q)))
             );
         }
