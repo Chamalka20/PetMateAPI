@@ -12,4 +12,6 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
     public DbSet<Vet> Vets { get; set; }
 
+    public DbSet<Appointment> Appointments { get; set; }
+
 }

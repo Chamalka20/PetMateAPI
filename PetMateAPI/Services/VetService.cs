@@ -1,6 +1,6 @@
 ﻿using PetMateAPI.Data;
-using PetMateAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using PetMateAPI.Models;
 
 
 public interface IVetService

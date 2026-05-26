@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PetMateAPI.Data;
-using PetMateAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using PetMateAPI.Models;
 
 namespace PetMateAPI.Controllers
 {
