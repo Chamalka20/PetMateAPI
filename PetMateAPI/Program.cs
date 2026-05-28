@@ -9,7 +9,7 @@ using PetMateAPI.Models;
 using PetMateAPI.Services;
 using System.Text;
 
-
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // Railway port
