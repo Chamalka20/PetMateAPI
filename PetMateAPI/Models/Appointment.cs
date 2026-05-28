@@ -1,6 +1,7 @@
 ﻿using PetMateAPI.Enums;
 
 namespace PetMateAPI.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 public class Appointment
 {
     public int Id { get; set; }
@@ -19,12 +20,6 @@ public class Appointment
     public string UserName { get; set; } = "";
     public string? UserPhone { get; set; }
 
-    // ── Home Visit Location ───────────────────────────────────────────
-    public string? HomeAddress { get; set; }
-    public double? HomeLatitude { get; set; }
-    public double? HomeLongitude { get; set; }
-    public string? HomeAddressNotes { get; set; }
-
     // ── Pet ───────────────────────────────────────────────────────────
     public string PetId { get; set; } = "";
     public string PetName { get; set; } = "";
@@ -41,12 +36,24 @@ public class Appointment
     public string? ServiceType { get; set; }
     public string? Notes { get; set; }
 
+    // ── Home Visit ────────────────────────────────────────────────────
+    public string? HomeAddress { get; set; }
+    public double? HomeLatitude { get; set; }
+    public double? HomeLongitude { get; set; }
+    public string? HomeAddressNotes { get; set; }
+
     // ── Payment ───────────────────────────────────────────────────────
     public double ConsultationFee { get; set; }
     public double? HomeVisitFee { get; set; }
-    public double TotalFee => Type == AppointmentType.HomeVisit
-        ? ConsultationFee + (HomeVisitFee ?? 0)
-        : ConsultationFee;
+    public double? EmergencyFee { get; set; }
+    public double TotalFee { get; set; }  // ← regular column
+
+    [NotMapped]  
+    public double CalculatedTotalFee =>
+        ConsultationFee +
+        (HomeVisitFee ?? 0) +
+        (EmergencyFee ?? 0);
+
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     public string? PaymentMethod { get; set; }
 

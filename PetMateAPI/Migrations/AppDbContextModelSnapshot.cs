@@ -267,6 +267,9 @@ namespace PetMateAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<double?>("EmergencyFee")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("HomeAddress")
                         .HasColumnType("text");
 
@@ -314,6 +317,9 @@ namespace PetMateAPI.Migrations
                     b.Property<string>("TimeSlot")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double>("TotalFee")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
