@@ -13,7 +13,7 @@ using PetMateAPI.Data;
 namespace PetMateAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260602073114_InitialCreate")]
+    [Migration("20260602073453_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
