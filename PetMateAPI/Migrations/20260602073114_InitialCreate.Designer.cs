@@ -13,7 +13,7 @@ using PetMateAPI.Data;
 namespace PetMateAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260406030249_InitialCreate")]
+    [Migration("20260602073114_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -171,7 +171,7 @@ namespace PetMateAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -183,6 +183,9 @@ namespace PetMateAPI.Migrations
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsGoogleUser")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -232,6 +235,127 @@ namespace PetMateAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("PetMateAPI.Models.Appointment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AppointmentDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ClinicAddress")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("ClinicLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("ClinicLongitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ClinicName")
+                        .HasColumnType("text");
+
+                    b.Property<double>("ConsultationFee")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<double?>("EmergencyFee")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("HomeAddress")
+                        .HasColumnType("text");
+
+                    b.Property<string>("HomeAddressNotes")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("HomeLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("HomeLongitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("HomeVisitFee")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PetBreed")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PetId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PetName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PetType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ServiceType")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TimeSlot")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("TotalFee")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserPhone")
+                        .HasColumnType("text");
+
+                    b.Property<int>("VetId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VetImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("VetName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Appointments");
+                });
+
             modelBuilder.Entity("PetMateAPI.Models.Pet", b =>
                 {
                     b.Property<int>("Id")
@@ -243,13 +367,16 @@ namespace PetMateAPI.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Allergies")
+                    b.Property<List<string>>("Allergies")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text[]");
 
                     b.Property<string>("Breed")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Gender")
                         .IsRequired()
@@ -262,9 +389,9 @@ namespace PetMateAPI.Migrations
                     b.Property<bool>("IsSpayedNeutered")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("MedicalConditions")
+                    b.Property<List<string>>("MedicalConditions")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text[]");
 
                     b.Property<string>("Name")
                         .IsRequired()
