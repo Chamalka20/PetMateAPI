@@ -10,25 +10,22 @@ namespace PetMateAPI.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
-                name: "PetId",
-                table: "Appointments",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            // ← Replace AlterColumn with raw SQL using USING cast
+            migrationBuilder.Sql(
+                @"ALTER TABLE ""Appointments"" 
+                  ALTER COLUMN ""PetId"" TYPE integer 
+                  USING ""PetId""::integer"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "PetId",
-                table: "Appointments",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer");
+            migrationBuilder.Sql(
+                @"ALTER TABLE ""Appointments"" 
+                  ALTER COLUMN ""PetId"" TYPE text 
+                  USING ""PetId""::text"
+            );
         }
     }
 }
