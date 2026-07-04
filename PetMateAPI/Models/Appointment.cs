@@ -21,7 +21,7 @@ public class Appointment
     public string? UserPhone { get; set; }
 
     // ── Pet ───────────────────────────────────────────────────────────
-    public string PetId { get; set; } = "";
+    public int  PetId { get; set; } 
     public string PetName { get; set; } = "";
     public string? PetType { get; set; }
     public string? PetBreed { get; set; }

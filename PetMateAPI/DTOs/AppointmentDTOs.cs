@@ -5,7 +5,7 @@
     public class BookAppointmentDto
     {
         public int VetId { get; set; }
-        public string PetId { get; set; } = "";
+        public int PetId { get; set; } 
         public DateTime AppointmentDate { get; set; }
         public string TimeSlot { get; set; } = "";
         public int Type { get; set; }            
