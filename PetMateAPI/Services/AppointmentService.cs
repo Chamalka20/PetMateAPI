@@ -9,7 +9,8 @@ namespace PetMateAPI.Services;
     public interface IAppointmentService
     {
         Task<AppointmentDto> BookAppointment(string userId, BookAppointmentDto dto);
-        Task<List<AppointmentDto>> GetUserAppointments(string userId);
+        Task<List<AppointmentDto>> GetUpcomingAppointments(string userId);  // ← rename
+        Task<List<AppointmentDto>> GetAppointmentHistory(string userId);
         Task<AppointmentDto?> GetAppointmentById(int id);
         Task<bool> CancelAppointment(int id, CancelAppointmentDto dto);
         Task<AvailableSlotsDto> GetAvailableSlots(int vetId, DateTime date);
@@ -48,7 +49,8 @@ public class AppointmentService : IAppointmentService
             a.VetId == dto.VetId &&
             a.AppointmentDate == dto.AppointmentDate &&
             a.TimeSlot == dto.TimeSlot &&
-            a.Status != AppointmentStatus.Cancelled
+            a.Status != AppointmentStatus.CancelledByAdmin &&
+            a.Status != AppointmentStatus.CancelledByVet
         );
 
         if (isSlotTaken)
@@ -99,12 +101,43 @@ public class AppointmentService : IAppointmentService
         return MapToDto(appointment);
     }
 
-    // ── Get User Appointments ─────────────────────────────────────────────
-    public async Task<List<AppointmentDto>> GetUserAppointments(string userId)
+    // ── Get User Upcoming Appointments ─────────────────────────────────────────────
+    public async Task<List<AppointmentDto>> GetUpcomingAppointments(string userId)
     {
+        var now = DateTime.UtcNow;
+
         var appointments = await _context.Appointments
-            .Where(a => a.UserId == userId)
-            .OrderByDescending(a => a.AppointmentDate)
+            .Where(a =>
+                a.UserId == userId &&
+                a.AppointmentDate >= now &&           
+                a.Status != AppointmentStatus.CancelledByUser &&
+                a.Status != AppointmentStatus.CancelledByVet &&
+                a.Status != AppointmentStatus.CancelledByAdmin &&
+                a.Status != AppointmentStatus.Completed       
+            )
+            .OrderBy(a => a.AppointmentDate)             
+            .ToListAsync();
+
+        return appointments.Select(MapToDto).ToList();
+    }
+
+    // ── Get User Appointments History ─────────────────────────────────────────────
+    public async Task<List<AppointmentDto>> GetAppointmentHistory(string userId)
+    {
+        var now = DateTime.UtcNow;
+
+        var appointments = await _context.Appointments
+            .Where(a =>
+                a.UserId == userId &&
+                (
+                    a.AppointmentDate < now ||                             
+                    a.Status == AppointmentStatus.Completed ||      
+                    a.Status == AppointmentStatus.CancelledByUser ||     
+                    a.Status == AppointmentStatus.CancelledByVet ||
+                    a.Status == AppointmentStatus.CancelledByAdmin
+                )
+            )
+            .OrderByDescending(a => a.AppointmentDate)   
             .ToListAsync();
 
         return appointments.Select(MapToDto).ToList();
@@ -129,7 +162,14 @@ public class AppointmentService : IAppointmentService
             throw new Exception("Cannot cancel a completed appointment");
         }
 
-        appointment.Status = AppointmentStatus.Cancelled;
+        // ── Set status based on who cancelled ────────────────────────────
+        appointment.Status = dto.CancelledBy.ToLower() switch
+        {
+            "vet" => AppointmentStatus.CancelledByVet,
+            "admin" => AppointmentStatus.CancelledByAdmin,
+            _ => AppointmentStatus.CancelledByUser   
+        };
+
         appointment.CancelledAt = DateTime.UtcNow;
         appointment.CancellationReason = dto.Reason;
         appointment.UpdatedAt = DateTime.UtcNow;
@@ -181,7 +221,8 @@ public class AppointmentService : IAppointmentService
             .Where(a =>
                 a.VetId == vetId &&
                 a.AppointmentDate == date &&
-                a.Status != AppointmentStatus.Cancelled
+                a.Status != AppointmentStatus.CancelledByAdmin&&
+                a.Status != AppointmentStatus.CancelledByVet
             )
             .Select(a => a.TimeSlot)
             .ToListAsync();

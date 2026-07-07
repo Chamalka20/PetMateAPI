@@ -23,6 +23,7 @@
     public class CancelAppointmentDto
     {
         public string Reason { get; set; } = "";
+        public string CancelledBy { get; set; } = "user";  
     }
 
     // ── Response DTOs (Server → Client) ──────────────────────────────────────

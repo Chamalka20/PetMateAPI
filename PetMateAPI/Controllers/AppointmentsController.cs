@@ -21,7 +21,7 @@ public class AppointmentsController : ControllerBase
             User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw new UnauthorizedAccessException("User not authenticated");
     // ── Book appointment ──────────────────────────────────────────────
-    [HttpPost]
+    [HttpPost("book")]
     public async Task<IActionResult> BookAppointment(
            [FromBody] BookAppointmentDto dto)
     {
@@ -42,15 +42,37 @@ public class AppointmentsController : ControllerBase
         }
     }
 
-    // ── Get user appointments ─────────────────────────────────────────
-    [HttpGet("my")]
-    public async Task<IActionResult> GetMyAppointments()
+    // ── Get user upcoming appointments ─────────────────────────────────────────
+    [HttpGet("my/upcoming")]
+    public async Task<IActionResult> GetUpcomingAppointments()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? throw new UnauthorizedAccessException();
-
-        var appointments = await _appointmentService.GetUserAppointments(userId);
-        return Ok(appointments);
+        try
+        {
+            var userId = GetUserId();
+            var appointments = await _appointmentService
+                .GetUpcomingAppointments(userId);
+            return Ok(appointments);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    // ── Get user history appointments ─────────────────────────────────────────
+    [HttpGet("my/history")]
+    public async Task<IActionResult> GetAppointmentHistory()
+    {
+        try
+        {
+            var userId = GetUserId();
+            var appointments = await _appointmentService
+                .GetAppointmentHistory(userId);
+            return Ok(appointments);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     // ── Get appointment by id ─────────────────────────────────────────
