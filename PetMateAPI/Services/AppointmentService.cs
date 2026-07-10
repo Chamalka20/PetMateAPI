@@ -9,10 +9,10 @@ namespace PetMateAPI.Services;
     public interface IAppointmentService
     {
         Task<AppointmentDto> BookAppointment(string userId, BookAppointmentDto dto);
-        Task<List<AppointmentDto>> GetUpcomingAppointments(string userId);  // ← rename
+        Task<List<AppointmentDto>> GetUpcomingAppointments(string userId); 
         Task<List<AppointmentDto>> GetAppointmentHistory(string userId);
         Task<AppointmentDto?> GetAppointmentById(int id);
-        Task<bool> CancelAppointment(int id, CancelAppointmentDto dto);
+        Task<object> CancelAppointment(int id, CancelAppointmentDto dto);
         Task<AvailableSlotsDto> GetAvailableSlots(int vetId, DateTime date);
     }
 
@@ -151,7 +151,7 @@ public class AppointmentService : IAppointmentService
     }
 
     // ── Cancel Appointment ────────────────────────────────────────────────
-    public async Task<bool> CancelAppointment(int id, CancelAppointmentDto dto)
+    public async Task<object> CancelAppointment(int id, CancelAppointmentDto dto)
     {
         var appointment = await _context.Appointments.FindAsync(id);
         if (appointment == null) return false;
@@ -181,7 +181,7 @@ public class AppointmentService : IAppointmentService
         }
 
         await _context.SaveChangesAsync();
-        return true;
+        return new { message = "Appointment cancelled successfully" };
     }
 
     // ── Get Available Slots ───────────────────────────────────────────────
