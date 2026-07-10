@@ -87,22 +87,29 @@ public class AppointmentsController : ControllerBase
     // ── Cancel appointment ────────────────────────────────────────────
     [HttpPatch("{id}/cancel")]
     public async Task<IActionResult> CancelAppointment(
-            int id,
-            [FromBody] CancelAppointmentDto dto)
+        int id,
+        [FromBody] CancelAppointmentDto dto)
     {
         try
         {
             var result = await _appointmentService
                 .CancelAppointment(id, dto);
 
-            if (!result)
-                return NotFound($"Appointment {id} not found");
-
-            return Ok("Appointment cancelled successfully");
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new
+            {
+                message = ex.Message
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
         }
     }
 
