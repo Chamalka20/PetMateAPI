@@ -1,15 +1,16 @@
 using FirebaseAdmin;
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MySqlConnector;
 using PetMateAPI.Data;
 using PetMateAPI.Models;
 using PetMateAPI.Services;
 using System.Text;
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // Railway port
@@ -25,24 +26,32 @@ if (!string.IsNullOrEmpty(dbUrl))
     var databaseUri = new Uri(dbUrl);
     var userInfo = databaseUri.UserInfo.Split(':');
 
-    var npgsqlBuilder = new Npgsql.NpgsqlConnectionStringBuilder
+    var mysqlBuilder = new MySqlConnectionStringBuilder
     {
-        Host = databaseUri.Host,
-        Port = databaseUri.Port,
-        Username = userInfo[0],
+        Server = databaseUri.Host,
+        Port = (uint)databaseUri.Port,
+        UserID = userInfo[0],
         Password = userInfo[1],
         Database = databaseUri.AbsolutePath.TrimStart('/'),
-        SslMode = Npgsql.SslMode.Require,
-        TrustServerCertificate = true
+        SslMode = MySqlSslMode.Required
     };
 
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(npgsqlBuilder.ToString()));
+        options.UseMySql(
+            mysqlBuilder.ConnectionString,
+            ServerVersion.AutoDetect(mysqlBuilder.ConnectionString)
+        ));
 }
 else
 {
+    var connectionString =
+          builder.Configuration.GetConnectionString("DefaultConnection");
+
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseMySql(
+            connectionString,
+            ServerVersion.AutoDetect(connectionString)
+        ));
 }
 
 // --------------------
