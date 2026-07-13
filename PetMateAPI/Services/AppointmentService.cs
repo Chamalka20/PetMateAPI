@@ -154,13 +154,20 @@ public class AppointmentService : IAppointmentService
     public async Task<object> CancelAppointment(int id, CancelAppointmentDto dto)
     {
         var appointment = await _context.Appointments.FindAsync(id);
-        if (appointment == null) return false;
+
+        // ← throw instead of return false
+        if (appointment == null)
+            throw new Exception($"Appointment {id} not found");
 
         // ── Can't cancel completed appointments ───────────────────────────
         if (appointment.Status == AppointmentStatus.Completed)
-        {
             throw new Exception("Cannot cancel a completed appointment");
-        }
+
+        // ── Can't cancel already cancelled appointments ───────────────────
+        if (appointment.Status == AppointmentStatus.CancelledByUser ||
+            appointment.Status == AppointmentStatus.CancelledByVet ||
+            appointment.Status == AppointmentStatus.CancelledByAdmin)
+            throw new Exception("Appointment is already cancelled");
 
         // ── Set status based on who cancelled ────────────────────────────
         appointment.Status = dto.CancelledBy.ToLower() switch
@@ -181,7 +188,12 @@ public class AppointmentService : IAppointmentService
         }
 
         await _context.SaveChangesAsync();
-        return new { message = "Appointment cancelled successfully" };
+        return new
+        {
+            success = true,
+            message = "Appointment cancelled successfully",
+          
+        };
     }
 
     // ── Get Available Slots ───────────────────────────────────────────────
