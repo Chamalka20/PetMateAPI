@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetMateAPI.DTOs;
+using PetMateAPI.Models;
 using PetMateAPI.Services;
 using Supabase.Gotrue;
+using Supabase.Gotrue.Mfa;
 using System.Security.Claims;
 
 namespace PetMateAPI.Controllers;
@@ -60,14 +62,22 @@ public class AppointmentsController : ControllerBase
     }
     // ── Get user history appointments ─────────────────────────────────────────
     [HttpGet("my/history")]
-    public async Task<IActionResult> GetAppointmentHistory()
+    public async Task<IActionResult> GetAppointmentHistory([FromQuery] int page ,
+    int pageSize )
     {
         try
         {
             var userId = GetUserId();
-            var appointments = await _appointmentService
-                .GetAppointmentHistory(userId);
-            return Ok(appointments);
+            var (appointments, total) = await _appointmentService
+                .GetAppointmentHistory(userId,page,pageSize);
+            return Ok(new
+            {
+                total,
+                page = page,
+                pageSize =pageSize,
+                data = appointments
+            });
+           
         }
         catch (Exception ex)
         {

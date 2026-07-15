@@ -3,14 +3,16 @@ using PetMateAPI.Data;
 using PetMateAPI.DTOs;
 using PetMateAPI.Enums;
 using PetMateAPI.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PetMateAPI.Services;
 
     public interface IAppointmentService
     {
         Task<AppointmentDto> BookAppointment(string userId, BookAppointmentDto dto);
-        Task<List<AppointmentDto>> GetUpcomingAppointments(string userId); 
-        Task<List<AppointmentDto>> GetAppointmentHistory(string userId);
+        Task<List<AppointmentDto>> GetUpcomingAppointments(string userId);
+        Task<(List<AppointmentDto>, int Total)> GetAppointmentHistory(string userId, int page ,
+        int pageSize );
         Task<AppointmentDto?> GetAppointmentById(int id);
         Task<object> CancelAppointment(int id, CancelAppointmentDto dto);
         Task<AvailableSlotsDto> GetAvailableSlots(int vetId, DateTime date);
@@ -107,40 +109,68 @@ public class AppointmentService : IAppointmentService
         var now = DateTime.UtcNow;
 
         var appointments = await _context.Appointments
-            .Where(a =>
-                a.UserId == userId &&
-                a.AppointmentDate >= now &&           
-                a.Status != AppointmentStatus.CancelledByUser &&
-                a.Status != AppointmentStatus.CancelledByVet &&
-                a.Status != AppointmentStatus.CancelledByAdmin &&
-                a.Status != AppointmentStatus.Completed       
-            )
-            .OrderBy(a => a.AppointmentDate)             
+            .Where(a => a.UserId == userId)
             .ToListAsync();
 
-        return appointments.Select(MapToDto).ToList();
+        var upcoming = appointments
+            .Where(a =>
+            {
+                var time = DateTime.ParseExact(
+                    a.TimeSlot,
+                    "hh:mm tt",
+                    System.Globalization.CultureInfo.InvariantCulture);
+
+                var appointmentDateTime = a.AppointmentDate.Date.Add(time.TimeOfDay);
+
+                return appointmentDateTime >= now &&
+                       a.Status != AppointmentStatus.CancelledByUser &&
+                       a.Status != AppointmentStatus.CancelledByVet &&
+                       a.Status != AppointmentStatus.CancelledByAdmin &&
+                       a.Status != AppointmentStatus.Completed;
+            })
+            .OrderBy(a =>
+            {
+                var time = DateTime.ParseExact(
+                    a.TimeSlot,
+                    "hh:mm tt",
+                    System.Globalization.CultureInfo.InvariantCulture);
+
+                return a.AppointmentDate.Date.Add(time.TimeOfDay);
+            })
+            .Select(MapToDto)
+            .ToList();
+
+        return upcoming;
     }
 
     // ── Get User Appointments History ─────────────────────────────────────────────
-    public async Task<List<AppointmentDto>> GetAppointmentHistory(string userId)
+    public async Task<(List<AppointmentDto>, int Total)> GetAppointmentHistory(string userId, int page ,
+    int pageSize )
     {
         var now = DateTime.UtcNow;
 
-        var appointments = await _context.Appointments
-            .Where(a =>
-                a.UserId == userId &&
-                (
-                    a.AppointmentDate < now ||                             
-                    a.Status == AppointmentStatus.Completed ||      
-                    a.Status == AppointmentStatus.CancelledByUser ||     
-                    a.Status == AppointmentStatus.CancelledByVet ||
-                    a.Status == AppointmentStatus.CancelledByAdmin
-                )
-            )
-            .OrderByDescending(a => a.AppointmentDate)   
+        var query = _context.Appointments
+          .Where(a =>
+              a.UserId == userId &&
+              (
+                  a.AppointmentDate < now ||
+                  a.Status == AppointmentStatus.Completed ||
+                  a.Status == AppointmentStatus.CancelledByUser ||
+                  a.Status == AppointmentStatus.CancelledByVet ||
+                  a.Status == AppointmentStatus.CancelledByAdmin
+              ));
+
+       
+        var total = await query.CountAsync();
+
+        var appointments = await query
+            .OrderByDescending(a => a.AppointmentDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        return appointments.Select(MapToDto).ToList();
+        return (appointments.Select(MapToDto).ToList(), total);
+
     }
 
     // ── Get Appointment By Id ─────────────────────────────────────────────
