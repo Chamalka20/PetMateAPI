@@ -263,6 +263,7 @@ public class AppointmentService : IAppointmentService
             .Where(a =>
                 a.VetId == vetId &&
                 a.AppointmentDate == date &&
+                a.Status != AppointmentStatus.CancelledByUser&&
                 a.Status != AppointmentStatus.CancelledByAdmin&&
                 a.Status != AppointmentStatus.CancelledByVet
             )
