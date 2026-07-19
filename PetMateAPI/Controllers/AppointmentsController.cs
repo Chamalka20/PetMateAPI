@@ -62,14 +62,20 @@ public class AppointmentsController : ControllerBase
     }
     // ── Get user history appointments ─────────────────────────────────────────
     [HttpGet("my/history")]
-    public async Task<IActionResult> GetAppointmentHistory([FromQuery] int page ,
-    int pageSize )
+    public async Task<IActionResult> GetAppointmentHistory([FromQuery] int page,
+    [FromQuery] int pageSize,
+    [FromQuery] string? vetName,
+    [FromQuery] DateTime? appointmentDate) 
     {
         try
         {
             var userId = GetUserId();
             var (appointments, total) = await _appointmentService
-                .GetAppointmentHistory(userId,page,pageSize);
+                .GetAppointmentHistory(userId,
+            page,
+            pageSize,
+            vetName,
+            appointmentDate);
             return Ok(new
             {
                 total,

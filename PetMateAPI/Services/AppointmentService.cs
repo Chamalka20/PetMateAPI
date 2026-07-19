@@ -11,8 +11,11 @@ namespace PetMateAPI.Services;
     {
         Task<AppointmentDto> BookAppointment(string userId, BookAppointmentDto dto);
         Task<List<AppointmentDto>> GetUpcomingAppointments(string userId);
-        Task<(List<AppointmentDto>, int Total)> GetAppointmentHistory(string userId, int page ,
-        int pageSize );
+        Task<(List<AppointmentDto>, int Total)> GetAppointmentHistory(string userId,
+        int page,
+        int pageSize,
+        string? vetName = null,
+        DateTime? appointmentDate = null);
         Task<AppointmentDto?> GetAppointmentById(int id);
         Task<object> CancelAppointment(int id, CancelAppointmentDto dto);
         Task<AvailableSlotsDto> GetAvailableSlots(int vetId, DateTime date);
@@ -144,8 +147,11 @@ public class AppointmentService : IAppointmentService
     }
 
     // ── Get User Appointments History ─────────────────────────────────────────────
-    public async Task<(List<AppointmentDto>, int Total)> GetAppointmentHistory(string userId, int page ,
-    int pageSize )
+    public async Task<(List<AppointmentDto>, int Total)> GetAppointmentHistory(string userId,
+    int page,
+    int pageSize,
+    string? vetName = null,
+    DateTime? appointmentDate = null)
     {
         var now = DateTime.UtcNow;
 
@@ -160,7 +166,21 @@ public class AppointmentService : IAppointmentService
                   a.Status == AppointmentStatus.CancelledByAdmin
               ));
 
-       
+        // Search by Vet Name
+        if (!string.IsNullOrWhiteSpace(vetName))
+        {
+            query = query.Where(a => a.VetName.Contains(vetName));
+        }
+
+        // Search by Appointment Date 
+        if (appointmentDate.HasValue)
+        {
+            var date = appointmentDate.Value.Date;
+
+            query = query.Where(a => a.AppointmentDate.Date == date);
+        }
+
+
         var total = await query.CountAsync();
 
         var appointments = await query

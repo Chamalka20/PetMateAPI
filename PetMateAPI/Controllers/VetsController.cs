@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PetMateAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using PetMateAPI.Data;
+using PetMateAPI.DTOs;
 using PetMateAPI.Models;
 
 namespace PetMateAPI.Controllers
@@ -9,9 +10,9 @@ namespace PetMateAPI.Controllers
     [Route("api/[controller]")]
     public class VetsController : ControllerBase
     {
-        private readonly IVetService _vetService;
+        private readonly IVetManagementService _vetService;
 
-        public VetsController(IVetService vetService)
+        public VetsController(IVetManagementService vetService)
         {
             _vetService = vetService;
         }
@@ -40,7 +41,7 @@ namespace PetMateAPI.Controllers
         }
 
         [HttpPost("bulk")]
-        public async Task<IActionResult> BulkInsert(List<Vet> vets)
+        public async Task<IActionResult> BulkInsert(List<VetImportDto> vets)
         {
             if (vets == null || !vets.Any())
                 return BadRequest("No data provided");

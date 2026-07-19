@@ -8,7 +8,8 @@
         public string? Location { get; set; }
         public double Rating { get; set; }
         public List<string>? Specializations { get; set; }
-        public List<string>? Services { get; set; }   
+        public ICollection<VetService> VetServices { get; set; }
+        = new List<VetService>();
         public int? ExperienceYears { get; set; }     
         public double? Price { get; set; }            
         public string? WorkingDays { get; set; }      

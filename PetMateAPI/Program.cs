@@ -134,8 +134,9 @@ FirebaseApp.Create(new AppOptions
 // --------------------
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPetService, PetService>();
-builder.Services.AddScoped<IVetService, VetService>();
+builder.Services.AddScoped<IVetManagementService, VetManagementService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddControllers();
 
 // --------------------
