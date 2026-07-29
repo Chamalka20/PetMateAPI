@@ -137,6 +137,7 @@ builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddScoped<IVetManagementService, VetManagementService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 builder.Services.AddControllers();
 
 // --------------------
