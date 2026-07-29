@@ -18,6 +18,10 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
     public DbSet<VetService> VetServices { get; set; }
 
+    public DbSet<Prescription> Prescriptions { get; set; }
+    public DbSet<Medicine> Medicines { get; set; }
+
+
 
 
 }
