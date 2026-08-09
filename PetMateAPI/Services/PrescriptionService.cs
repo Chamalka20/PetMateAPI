@@ -7,7 +7,12 @@ namespace PetMateAPI.Services
 {
     public interface IPrescriptionService
     {
-        Task<List<PrescriptionDto>> GetUserPrescriptions(string userId);
+        Task<(List<PrescriptionDto> Prescriptions, int Total)> GetUserPrescriptions(
+            string userId,
+            string? searchQuery = null,
+            int page = 1,
+             int pageSize = 10
+           );
         Task<PrescriptionDto?> GetPrescriptionById(int id);
         Task<PrescriptionDto> CreatePrescription(CreatePrescriptionDto dto);
         Task<List<PrescriptionDto>> GetByAppointmentId(int appointmentId);
@@ -22,15 +27,35 @@ namespace PetMateAPI.Services
             _context = context;
         }
 
-        public async Task<List<PrescriptionDto>> GetUserPrescriptions(string userId)
+        public async Task<(List<PrescriptionDto> Prescriptions, int Total)> GetUserPrescriptions(string userId,
+     string? searchQuery = null,
+     int page = 1,
+     int pageSize = 10
+    )
         {
-            var prescriptions = await _context.Prescriptions
+
+            var query = _context.Prescriptions
                 .Include(p => p.Medicines)
-                .Where(p => p.UserId == userId)
+                .Where(p => p.UserId == userId);
+
+            // ── Search filter ─────────────────────────────────────────────────
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query.Where(p =>
+                    p.VetName.Contains(searchQuery) ||
+                    p.PetName.Contains(searchQuery) ||
+                    (p.Diagnosis != null && p.Diagnosis.Contains(searchQuery))
+                );
+            }
+
+            var total = await query.CountAsync();
+            var prescriptions = await query
                 .OrderByDescending(p => p.IssuedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return prescriptions.Select(MapToDto).ToList();
+            return (prescriptions.Select(MapToDto).ToList(), total);
         }
 
         public async Task<PrescriptionDto?> GetPrescriptionById(int id)
