@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PetMateAPI.DTOs;
 using PetMateAPI.Services;
-using Supabase.Gotrue;
 using System.Security.Claims;
 
 namespace PetMateAPI.Controllers
@@ -25,14 +24,22 @@ namespace PetMateAPI.Controllers
 
         // ── Get my prescriptions ──────────────────────────────────────────
         [HttpGet("my")]
-        public async Task<IActionResult> GetMyPrescriptions()
+        public async Task<IActionResult> GetMyPrescriptions([FromQuery] string? searchQuery = null,
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
                 var userId = GetUserId();
-                var prescriptions = await _prescriptionService
-                    .GetUserPrescriptions(userId);
-                return Ok(prescriptions);
+                var (prescriptions, total) = await _prescriptionService
+                    .GetUserPrescriptions(userId, searchQuery, page, pageSize);
+
+                return Ok(new
+                {
+                    total,
+                    page,
+                    pageSize,
+                    data = prescriptions
+                });
             }
             catch (Exception ex)
             {

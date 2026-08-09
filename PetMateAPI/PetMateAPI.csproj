@@ -29,4 +29,12 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\chama\source\repos\PetMateAPI\PetMateAPI\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\chama\source\repos\PetMateAPI\PetMateAPI\.editorconfig" />
+  </ItemGroup>
+
 </Project>
